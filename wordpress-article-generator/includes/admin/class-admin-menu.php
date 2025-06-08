@@ -58,6 +58,13 @@ class WPAG_Admin_Menu {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+            
+            <div class="notice notice-info">
+                <p><strong><?php _e('API Configuration', 'wp-article-generator'); ?></strong></p>
+                <p><?php _e('This plugin uses OpenAI API for article generation. The API key is configured in the .env file.', 'wp-article-generator'); ?></p>
+                <p><?php _e('Model: gpt-4o-latest', 'wp-article-generator'); ?></p>
+            </div>
+            
             <form method="post" action="options.php">
                 <?php
                 settings_fields('wpag_settings_group');
@@ -65,6 +72,18 @@ class WPAG_Admin_Menu {
                 submit_button();
                 ?>
             </form>
+            
+            <div class="wpag-settings-info">
+                <h2><?php _e('Usage Instructions', 'wp-article-generator'); ?></h2>
+                <ol>
+                    <li><?php _e('Navigate to "Article Generator" in the admin menu', 'wp-article-generator'); ?></li>
+                    <li><?php _e('Enter a title and optional keywords for your article', 'wp-article-generator'); ?></li>
+                    <li><?php _e('Select the desired article length and tone', 'wp-article-generator'); ?></li>
+                    <li><?php _e('Click "Generate Article" to create content using AI', 'wp-article-generator'); ?></li>
+                    <li><?php _e('Review and edit the generated content as needed', 'wp-article-generator'); ?></li>
+                    <li><?php _e('Save as draft or publish immediately', 'wp-article-generator'); ?></li>
+                </ol>
+            </div>
         </div>
         <?php
     }

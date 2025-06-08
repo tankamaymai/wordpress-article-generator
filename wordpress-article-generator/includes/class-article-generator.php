@@ -33,14 +33,22 @@ class WPAG_Article_Generator {
         $length = intval($params['length']);
         $tone = sanitize_text_field($params['tone']);
         
-        // Here you would integrate with an AI API (OpenAI, Claude, etc.)
-        // For now, we'll return a sample response
-        $article = array(
-            'title' => $title,
-            'content' => $this->generate_sample_content($title, $keywords, $length),
-            'excerpt' => $this->generate_sample_excerpt($title),
-            'tags' => explode(',', $keywords),
-        );
+        // Use OpenAI API to generate article
+        $openai_client = new WPAG_OpenAI_Client();
+        $article = $openai_client->generate_article($title, $keywords, $length, $tone);
+        
+        // If API fails, fallback to sample content
+        if (is_wp_error($article)) {
+            error_log('OpenAI API Error: ' . $article->get_error_message());
+            
+            // Return sample content as fallback
+            $article = array(
+                'title' => $title,
+                'content' => $this->generate_sample_content($title, $keywords, $length),
+                'excerpt' => $this->generate_sample_excerpt($title),
+                'tags' => explode(',', $keywords),
+            );
+        }
         
         return $article;
     }

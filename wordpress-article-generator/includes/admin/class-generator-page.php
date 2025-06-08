@@ -97,7 +97,7 @@ class WPAG_Generator_Page {
                         
                         <div class="wpag-preview-body">
                             <h3><?php _e('Content', 'wp-article-generator'); ?></h3>
-                            <div id="wpag-preview-content" class="wpag-content-editor"></div>
+                            <div id="wpag-preview-content" class="wpag-content-editor" contenteditable="true"></div>
                         </div>
                         
                         <div class="wpag-preview-tags">

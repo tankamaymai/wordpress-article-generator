@@ -40,7 +40,16 @@ jQuery(document).ready(function($) {
                 // Display generated article
                 displayGeneratedArticle(response.data);
             } else {
-                alert(response.data || wpag_ajax.error_text);
+                // Show more detailed error message
+                var errorMsg = 'Error generating article: ';
+                if (typeof response.data === 'string') {
+                    errorMsg += response.data;
+                } else if (response.data && response.data.message) {
+                    errorMsg += response.data.message;
+                } else {
+                    errorMsg += wpag_ajax.error_text;
+                }
+                alert(errorMsg);
             }
         }).fail(function() {
             $spinner.removeClass('is-active');

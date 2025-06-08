@@ -20,7 +20,21 @@ define('WPAG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WPAG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WPAG_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
+// Load environment variables
+if (file_exists(WPAG_PLUGIN_DIR . '.env')) {
+    $env_content = file_get_contents(WPAG_PLUGIN_DIR . '.env');
+    $lines = explode("\n", $env_content);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (!empty($line) && strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $_ENV[trim($key)] = trim($value);
+        }
+    }
+}
+
 // Load required files
+require_once WPAG_PLUGIN_DIR . 'includes/class-openai-client.php';
 require_once WPAG_PLUGIN_DIR . 'includes/class-article-generator.php';
 require_once WPAG_PLUGIN_DIR . 'includes/admin/class-admin-menu.php';
 require_once WPAG_PLUGIN_DIR . 'includes/admin/class-generator-page.php';
