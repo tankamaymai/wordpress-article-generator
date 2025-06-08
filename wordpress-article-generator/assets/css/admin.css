@@ -1,0 +1,99 @@
+/**
+ * WordPress Article Generator Admin Styles
+ */
+
+.wpag-container {
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+.wpag-generator-form {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin-bottom: 20px;
+}
+
+.wpag-generator-form h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.wpag-preview {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.wpag-preview h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.wpag-preview-content {
+    margin-top: 20px;
+}
+
+.wpag-preview-content h3 {
+    margin-bottom: 10px;
+    color: #23282d;
+}
+
+.wpag-content-editor {
+    min-height: 300px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fafafa;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.wpag-save-options {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.wpag-save-options label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.wpag-save-options input[type="radio"] {
+    margin-right: 5px;
+}
+
+#wpag-save-result {
+    margin-top: 20px;
+}
+
+#wpag-save-result.notice-success {
+    border-left-color: #46b450;
+}
+
+#wpag-save-result.notice-error {
+    border-left-color: #dc3232;
+}
+
+.spinner {
+    float: none;
+    margin-left: 10px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .wpag-container {
+        margin-top: 10px;
+    }
+    
+    .wpag-generator-form,
+    .wpag-preview {
+        padding: 10px;
+    }
+}
