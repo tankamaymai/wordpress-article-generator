@@ -15,38 +15,93 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WPAG_VERSION', '1.0.0');
-define('WPAG_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('WPAG_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WPAG_PLUGIN_BASENAME', plugin_basename(__FILE__));
+if (!defined('WPAG_VERSION')) {
+    define('WPAG_VERSION', '1.0.0');
+}
+if (!defined('WPAG_PLUGIN_DIR')) {
+    define('WPAG_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('WPAG_PLUGIN_URL')) {
+    define('WPAG_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+if (!defined('WPAG_PLUGIN_BASENAME')) {
+    define('WPAG_PLUGIN_BASENAME', plugin_basename(__FILE__));
+}
 
-// Load environment variables
-if (file_exists(WPAG_PLUGIN_DIR . '.env')) {
-    $env_content = file_get_contents(WPAG_PLUGIN_DIR . '.env');
-    $lines = explode("\n", $env_content);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (!empty($line) && strpos($line, '=') !== false) {
-            list($key, $value) = explode('=', $line, 2);
-            $_ENV[trim($key)] = trim($value);
+// Initialize the plugin
+class WPAG_Plugin {
+    
+    private static $instance = null;
+    
+    public static function get_instance() {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    private function __construct() {
+        $this->load_dependencies();
+        $this->init_hooks();
+    }
+    
+    private function load_dependencies() {
+        // Load bootstrap for error checking
+        require_once WPAG_PLUGIN_DIR . 'includes/bootstrap.php';
+        
+        // Check if we can safely load
+        if (!wpag_safe_init()) {
+            return;
+        }
+        
+        // Load environment variables
+        $this->load_env_file();
+        
+        // Load required files
+        require_once WPAG_PLUGIN_DIR . 'includes/class-openai-client.php';
+        require_once WPAG_PLUGIN_DIR . 'includes/class-article-generator.php';
+        require_once WPAG_PLUGIN_DIR . 'includes/admin/class-admin-menu.php';
+        require_once WPAG_PLUGIN_DIR . 'includes/admin/class-generator-page.php';
+    }
+    
+    private function load_env_file() {
+        $env_file = WPAG_PLUGIN_DIR . '.env';
+        if (file_exists($env_file)) {
+            $env_content = file_get_contents($env_file);
+            $lines = explode("\n", $env_content);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line) && strpos($line, '=') !== false) {
+                    $parts = explode('=', $line, 2);
+                    if (count($parts) == 2) {
+                        $_ENV[trim($parts[0])] = trim($parts[1]);
+                    }
+                }
+            }
+        }
+    }
+    
+    private function init_hooks() {
+        add_action('init', array($this, 'load_textdomain'));
+        add_action('init', array($this, 'init_plugin'));
+    }
+    
+    public function load_textdomain() {
+        load_plugin_textdomain('wp-article-generator', false, dirname(WPAG_PLUGIN_BASENAME) . '/languages');
+    }
+    
+    public function init_plugin() {
+        // Initialize main plugin class
+        if (class_exists('WPAG_Article_Generator')) {
+            $article_generator = new WPAG_Article_Generator();
+            $article_generator->init();
         }
     }
 }
 
-// Load required files
-require_once WPAG_PLUGIN_DIR . 'includes/class-openai-client.php';
-require_once WPAG_PLUGIN_DIR . 'includes/class-article-generator.php';
-require_once WPAG_PLUGIN_DIR . 'includes/admin/class-admin-menu.php';
-require_once WPAG_PLUGIN_DIR . 'includes/admin/class-generator-page.php';
-
-// Initialize the plugin
+// Initialize plugin
 function wpag_init() {
-    // Load text domain for translations
-    load_plugin_textdomain('wp-article-generator', false, dirname(WPAG_PLUGIN_BASENAME) . '/languages');
-    
-    // Initialize main plugin class
-    $article_generator = new WPAG_Article_Generator();
-    $article_generator->init();
+    return WPAG_Plugin::get_instance();
 }
 add_action('plugins_loaded', 'wpag_init');
 

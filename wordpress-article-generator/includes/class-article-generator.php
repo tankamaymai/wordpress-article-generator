@@ -14,32 +14,40 @@ class WPAG_Article_Generator {
      */
     public function init() {
         // Initialize admin functionality
-        if (is_admin()) {
+        if (function_exists('is_admin') && is_admin()) {
             $admin_menu = new WPAG_Admin_Menu();
             $admin_menu->init();
         }
         
         // Add AJAX handlers
-        add_action('wp_ajax_wpag_generate_article', array($this, 'ajax_generate_article'));
-        add_action('wp_ajax_wpag_save_article', array($this, 'ajax_save_article'));
+        if (function_exists('add_action')) {
+            add_action('wp_ajax_wpag_generate_article', array($this, 'ajax_generate_article'));
+            add_action('wp_ajax_wpag_save_article', array($this, 'ajax_save_article'));
+        }
     }
     
     /**
      * Generate article content
      */
     public function generate_article($params) {
-        $title = sanitize_text_field($params['title']);
-        $keywords = sanitize_text_field($params['keywords']);
+        $title = function_exists('sanitize_text_field') ? sanitize_text_field($params['title']) : strip_tags($params['title']);
+        $keywords = function_exists('sanitize_text_field') ? sanitize_text_field($params['keywords']) : strip_tags($params['keywords']);
         $length = intval($params['length']);
-        $tone = sanitize_text_field($params['tone']);
+        $tone = function_exists('sanitize_text_field') ? sanitize_text_field($params['tone']) : strip_tags($params['tone']);
         
         // Use OpenAI API to generate article
         $openai_client = new WPAG_OpenAI_Client();
         $article = $openai_client->generate_article($title, $keywords, $length, $tone);
         
         // If API fails, fallback to sample content
-        if (is_wp_error($article)) {
-            error_log('OpenAI API Error: ' . $article->get_error_message());
+        if ((function_exists('is_wp_error') && is_wp_error($article)) || 
+            (is_array($article) && isset($article['error']) && $article['error'])) {
+            
+            if (function_exists('is_wp_error') && is_wp_error($article)) {
+                error_log('OpenAI API Error: ' . $article->get_error_message());
+            } elseif (isset($article['message'])) {
+                error_log('OpenAI API Error: ' . $article['message']);
+            }
             
             // Return sample content as fallback
             $article = array(

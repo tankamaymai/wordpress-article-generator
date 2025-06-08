@@ -25,7 +25,13 @@ class WPAG_OpenAI_Client {
      */
     public function generate_article($title, $keywords, $length, $tone) {
         if (empty($this->api_key)) {
-            return new WP_Error('no_api_key', 'OpenAI API key is not configured');
+            if (class_exists('WP_Error')) {
+                return new WP_Error('no_api_key', 'OpenAI API key is not configured');
+            }
+            return array(
+                'error' => true,
+                'message' => 'OpenAI API key is not configured'
+            );
         }
         
         // Create the prompt
@@ -49,6 +55,13 @@ class WPAG_OpenAI_Client {
         );
         
         // Make API request
+        if (!function_exists('wp_remote_post')) {
+            return array(
+                'error' => true,
+                'message' => 'WordPress HTTP API not available'
+            );
+        }
+        
         $response = wp_remote_post($this->api_url, array(
             'headers' => array(
                 'Authorization' => 'Bearer ' . $this->api_key,
@@ -59,26 +72,35 @@ class WPAG_OpenAI_Client {
         ));
         
         // Handle response
-        if (is_wp_error($response)) {
+        if (function_exists('is_wp_error') && is_wp_error($response)) {
             return $response;
         }
         
-        $response_code = wp_remote_retrieve_response_code($response);
-        $body = wp_remote_retrieve_body($response);
+        $response_code = function_exists('wp_remote_retrieve_response_code') ? wp_remote_retrieve_response_code($response) : 200;
+        $body = function_exists('wp_remote_retrieve_body') ? wp_remote_retrieve_body($response) : '';
         $data = json_decode($body, true);
         
         // Handle rate limiting
         if ($response_code === 429) {
-            return new WP_Error('rate_limit', 'API rate limit exceeded. Please try again later.');
+            if (class_exists('WP_Error')) {
+                return new WP_Error('rate_limit', 'API rate limit exceeded. Please try again later.');
+            }
+            return array('error' => true, 'message' => 'API rate limit exceeded. Please try again later.');
         }
         
         if (isset($data['error'])) {
             $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown API error';
-            return new WP_Error('api_error', $error_message);
+            if (class_exists('WP_Error')) {
+                return new WP_Error('api_error', $error_message);
+            }
+            return array('error' => true, 'message' => $error_message);
         }
         
         if (!isset($data['choices'][0]['message']['content'])) {
-            return new WP_Error('invalid_response', 'Invalid response from OpenAI API');
+            if (class_exists('WP_Error')) {
+                return new WP_Error('invalid_response', 'Invalid response from OpenAI API');
+            }
+            return array('error' => true, 'message' => 'Invalid response from OpenAI API');
         }
         
         $content = $data['choices'][0]['message']['content'];
